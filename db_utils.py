@@ -2,14 +2,19 @@ import yaml
 import pandas as pd
 import sqlalchemy
 import seaborn as sns
+from sqlalchemy import text
+
+
 
 
 class RDSDatabaseConnector:
+    
     def get_creds(self):
         with open("credentials.yaml", "r") as file:
             result = dict(yaml.safe_load(file))
             return result
 
+    
     def __init__(self):
         creds = self.get_creds()
         creds_string = f"postgresql://{creds['RDS_USER']}:{creds['RDS_PASSWORD']}@{creds['RDS_HOST']}:{creds['RDS_PORT']}/{creds['RDS_DATABASE']}"
@@ -17,7 +22,8 @@ class RDSDatabaseConnector:
 
     def execute_query(self, query):
         with self.engine.connect() as conn:
-            result = conn.execute(query)
+            statement = text(query)
+            result = conn.execute(statement)
             return result.fetchall()
 
     def extract_data(self):
@@ -34,7 +40,7 @@ class Plotter:
         self.df = dataframe
 
     def plots(self):
-        return sns.histplot(self.dataframe)
+        return sns.histplot(self.df)
 
 
 class DataInfo:
