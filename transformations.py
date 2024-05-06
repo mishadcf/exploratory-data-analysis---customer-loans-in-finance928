@@ -39,6 +39,7 @@ class Transforms:
         """Return a DataFrame with counts of null values in each column."""
         nulls = pd.DataFrame(df.isnull().sum()).reset_index()
         nulls.columns = ["column", "null_count"]
+        nulls["percentage"] = (nulls.null_count / 54321) * 100.0
         return nulls
     
     @staticmethod
@@ -70,6 +71,13 @@ class Transforms:
 
 
 class Plotter:
+    
+    def __init__(self, dataframe):
+        """
+        Initializes the Plotter with a dataframe.
+        :param dataframe: A pandas DataFrame containing the data to plot.
+        """
+        self.dataframe = dataframe
 
     @staticmethod    
         
@@ -101,3 +109,41 @@ class Plotter:
             )
 
         plt.show()
+        
+      
+    def plot_skewness(self, columns):
+        """
+        Plots histograms of the specified columns to visualize skewness.
+        :param columns: A list of column names from the dataframe whose distributions are to be plotted.
+        """
+        # Check if columns list is empty
+        if not columns:
+            print("No columns provided for plotting.")
+            return
+
+        # Number of rows and columns for subplots
+        n_rows = len(columns) // 2 + len(columns) % 2
+        n_cols = 2
+
+        # Setting up the plot dimensions
+        plt.figure(figsize=(n_cols * 5, n_rows * 4))
+
+        for index, column in enumerate(columns, 1):
+            plt.subplot(n_rows, n_cols, index)
+            # Check if column exists in the dataframe
+            if column in self.dataframe.columns:
+                # Plotting the histogram
+                self.dataframe[column].hist(bins=30)
+                plt.title(f'Histogram of {column}')
+                plt.xlabel(column)
+                plt.ylabel('Frequency')
+            else:
+                print(f"Column '{column}' not found in the dataframe.")
+
+        plt.tight_layout()
+        plt.show()
+
+    # Example usage:
+    # Assuming 'df' is your DataFrame and it's already loaded with data.
+    # plotter = Plotter(df)
+    # plotter.plot_skewness(['column1', 'column2', 'column3'])
