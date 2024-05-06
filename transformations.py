@@ -1,3 +1,6 @@
+# The `Transforms` class provides methods for cleaning and transforming data in a loan payments
+# DataFrame, while the `Plotter` class offers visualization capabilities for exploring data
+# distributions and null values.
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -68,8 +71,13 @@ class Transforms:
                 raise ValueError(f"Column {col} does not exist in DataFrame")
             df[col] = pd.to_numeric(df[col].str.extract("(\d+)", expand=False))
     
-
-
+    @staticmethod
+    def clean_outliers_by_IQR(col,df):
+       upper_bound =  df[col].median() + 1.5 * (df[col].quantile(0.75) - df[col].quantile(0.25))
+       return df[df[col] <= upper_bound]
+    
+    
+   
 class Plotter:
     
     def __init__(self, dataframe):
@@ -111,16 +119,21 @@ class Plotter:
         plt.show()
         
       
-    def plot_skewness(self, columns):
+    def plot_skewness(self, columns =None):
         """
         Plots histograms of the specified columns to visualize skewness.
         :param columns: A list of column names from the dataframe whose distributions are to be plotted.
         """
         # Check if columns list is empty
+        if columns is None:
+            columns = self.dataframe.columns.tolist() # Default to all columns if none specified
+            
+           # Check if columns list is empty
         if not columns:
             print("No columns provided for plotting.")
             return
-
+    
+        
         # Number of rows and columns for subplots
         n_rows = len(columns) // 2 + len(columns) % 2
         n_cols = 2
@@ -142,8 +155,27 @@ class Plotter:
 
         plt.tight_layout()
         plt.show()
+        
+    def plot_outliers(self):
+        # Selecting numeric columns only
+        numeric_cols = self.dataframe.select_dtypes(include=['number']).columns.tolist()
+        
+        # Number of rows and columns for subplots
+        n_cols = 3
+        n_rows = len(numeric_cols) // n_cols + (len(numeric_cols) % n_cols > 0)
+        
+        # Set up the matplotlib figure
+        plt.figure(figsize=(n_cols * 6, n_rows * 4))
+        
+        for index, column in enumerate(numeric_cols, 1):
+            plt.subplot(n_rows, n_cols, index)
+            sns.boxplot(y=self.dataframe[column])
+            plt.title(f'Box Plot of {column}')
+            plt.xlabel(column)
+        
+        plt.tight_layout()
+        plt.show()
+            
+            
 
-    # Example usage:
-    # Assuming 'df' is your DataFrame and it's already loaded with data.
-    # plotter = Plotter(df)
-    # plotter.plot_skewness(['column1', 'column2', 'column3'])
+
