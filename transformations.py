@@ -1,7 +1,4 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-
 
 class Transforms:
     """General utility functions for cleaning loan payments DataFrame to enable exploratory data analysis"""
